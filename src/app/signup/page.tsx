@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -13,22 +12,25 @@ export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSignup = async (e: React.FormEvent) => {
+    setLoading(true);
     e.preventDefault();
     try {
       const res = await fetch("/api/auth/signup", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ name,email, password }),
-  credentials: "same-origin", // add this
-});
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password }),
+        credentials: "same-origin", // add this
+      });
 
       if (!res.ok) {
         const data = await res.json();
         setError(data.error || "Signup failed");
         return;
       }
+      setLoading(false);
 
       router.push("/login");
     } catch (err) {
@@ -74,9 +76,10 @@ export default function SignupPage() {
 
           <Button
             type="submit"
+            disabled={loading}
             className="w-full bg-[var(--color-primary)] text-[var(--color-bg)] hover:bg-[var(--color-secondary-3)] transition"
           >
-            Sign Up
+            {loading ? "Signing in..." : "Sign Up"}
           </Button>
 
           <p className="text-sm text-center mt-4">
