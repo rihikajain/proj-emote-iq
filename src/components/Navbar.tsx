@@ -1,158 +1,167 @@
+// src/components/Navbar.tsx
 "use client";
 
-import { useSession, signOut } from "next-auth/react";
-import { useEffect, useState } from "react";
-import ThemeToggle from "@/components/ThemeToggle";
-
-interface Entry {
-  id: string;
-  mood: string;
-  note: string;
-  createdAt: string;
-}
-
-export default function ProfilePage() {
+import Link from "next/link";
+import { signOut, useSession } from "next-auth/react";
+import { useState, useRef, useEffect } from "react";
+import useTheme from "@/hooks/useTheme";
+import Image from "next/image";
+export default function Navbar() {
   const { data: session, status } = useSession();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [entries, setEntries] = useState<Entry[]>([]);
-
-  // Populate user info from session
+  const [open, setOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement | null>(null);
+  const { theme, toggle } = useTheme();
+  // close dropdown on outside click
   useEffect(() => {
-    if (session?.user) {
-      setName(session.user.name || "");
-      setEmail(session.user.email || "");
+    function onDoc(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node))
+        setOpen(false);
     }
-  }, [session]);
-
-  // Fetch user's entries safely
-  useEffect(() => {
-    if (session) {
-      fetch("/api/entries")
-        .then((res) => res.json())
-        .then((data) =>
-          setEntries(Array.isArray(data.entries) ? data.entries : [])
-        )
-        .catch((err) => {
-          console.error("Failed to fetch entries:", err);
-          setEntries([]);
-        });
-    }
-  }, [session]);
-
-  if (status === "loading") {
-    return <p>Loading your profile...</p>;
-  }
-
-  if (!session) {
-    return <p>You need to log in to view your profile.</p>;
-  }
-
-  const handleSave = () => {
-    // TODO: Connect to API to update user info
-    console.log("Saved info:", { name, email });
-    alert("Profile info saved!");
-  };
-
-  const averageMood =
-    entries.length > 0
-      ? (
-          entries.reduce((sum, e) => sum + parseInt(e.mood || "0"), 0) /
-          entries.length
-        ).toFixed(1)
-      : "0";
+    document.addEventListener("click", onDoc);
+    return () => document.removeEventListener("click", onDoc);
+  }, []);
 
   return (
-    <div className="min-h-screen p-6 bg-background text-foreground">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Your Profile</h1>
-        <ThemeToggle />
-      </div>
+    <header className="w-full left-0 right-0 sticky top-0 z-50">
+      <div
+        className="flex items-center justify-between px-6 py-4 w-full"
+        style={{
+          background:
+            "linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.3))",
+          backdropFilter: "blur(6px)",
+        }}
+      >
+        {/* left: brand */}
+        <div className="flex items-center justify-between  w-full ">
+          <div className="flex items-center gap-6">
+            <Link href="/" className="flex items-center gap-3">
+              {/* <div
+              className="w-10 h-10 rounded-full flex items-center justify-center"
+              style={{
+                background:
+                  "linear-gradient(135deg, var(--color-primary), var(--color-secondary-1))",
+              }}
+            >
+              <div
+                className="w-5 h-5 rounded-full"
+                style={{ background: "#f5f5f4" }}
+              />
+            </div> */}
 
-      {/* User Info */}
-      <div className="bg-card p-6 rounded-xl shadow-md max-w-md mb-6">
-        <div className="flex items-center gap-4 mb-4">
-          
-            <div className="w-16 h-16 rounded-full bg-gray-400 flex items-center justify-center text-white text-lg">
-              {session.user?.name?.[0] || "U"}
-            </div>
-        
-          <div>
-            <p className="font-semibold text-lg">{session.user?.name || "Anonymous"}</p>
-            <p className="text-sm text-muted-foreground">{session.user?.email || "No email"}</p>
+              <Image
+                src="/what.png"
+                alt="logo"
+                width={100}
+                height={100}
+                className="w-10 h-10"
+              />
+
+              <span className="text-lg font-semibold">EmoteIQ</span>
+            </Link>
+          </div>
+
+          {/* right: conditional nav */}
+          <div className="flex items-center  gap-4 ">
+            {/* show links only when authenticated */}
+            {status === "authenticated" && (
+              <>
+              <Link
+                  href="/"
+                  className="text-sm hover:underline font-semibold"
+                >
+                  Home
+                </Link>
+                <Link
+                  href="/entries"
+                  className="text-sm hover:underline font-semibold"
+                >
+                  Entries
+                </Link>
+                <Link
+                  href="/dashboard"
+                  className="text-sm hover:underline font-semibold"
+                >
+                  Dashboard
+                </Link>
+              </>
+            )}
+
+            {/* if loading, show nothing extra */}
+            {status === "loading" && (
+              <div className="w-6 h-6 rounded-full bg-gray-200 animate-pulse" />
+            )}
+
+            {/* if unauthenticated, only show brand (we already have left) and optionally login link */}
+            {status !== "authenticated" && (
+              <div className="ml-2" aria-hidden>
+                {/* intentionally empty to keep layout minimal for unauthenticated users */}
+              </div>
+            )}
+
+            {/* when authenticated show username and dropdown */}
+            {status === "authenticated" && session?.user && (
+              <div className="relative" ref={menuRef}>
+                <button
+                  onClick={() => setOpen((o) => !o)}
+                  className="flex items-center gap-2  py-1 rounded-md "
+                  aria-haspopup="true"
+                  aria-expanded={open}
+                >
+                  <div className="w-9 h-9 rounded-full bg-(--color-secondary-1) flex items-center justify-center text-white text-lg font-bold">
+                    {session.user?.name?.[0] || "U"}
+                  </div>
+                  {/* <span className="text-sm font-bold">
+                    {(session.user.name ?? session.user.email ?? "User")
+                      .charAt(0)
+                      .toUpperCase() +
+                      (session.user.name ?? session.user.email ?? "User")
+                        .slice(1)
+                        .toLowerCase()}
+                  </span> */}
+
+                  <svg
+                    className={`w-4 h-4 transition-transform ${
+                      open ? "rotate-180" : ""
+                    }`}
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    aria-hidden
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.25 8.27a.75.75 0 01-.02-1.06z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </button>
+
+                {open && (
+                  <div className="absolute right-0 mt-2 w-44 bg-white dark:bg-[#111827] rounded-md shadow-lg py-1 z-50">
+                    <button
+                      onClick={() => signOut({ callbackUrl: "/" })}
+                      className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800"
+                    >
+                      Sign out
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
-        <button
-          onClick={() => signOut()}
-          className="mt-2 px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
-        >
-          Logout
-        </button>
-      </div>
 
-      {/* Edit Info */}
-      <div className="bg-card p-6 rounded-xl shadow-md max-w-md mb-6">
-        <h2 className="text-xl font-semibold mb-4">Edit Info</h2>
-
-        <label className="block mb-2">
-          Name:
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full mt-1 p-2 border rounded-md"
-          />
-        </label>
-
-        <label className="block mb-4">
-          Email:
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full mt-1 p-2 border rounded-md"
-          />
-        </label>
+        {/* toggle button/ */}
 
         <button
-          onClick={handleSave}
-          className="px-4 py-2 bg-primary text-white rounded-md hover:opacity-90 transition"
+          suppressHydrationWarning
+          onClick={toggle}
+          aria-label="Toggle theme"
+          className="p-2 "
+          style={{ borderColor: "rgba(0,0,0,0.06)" }}
         >
-          Save
+          {theme === "dark" ? "🌙" : "☀️"}
         </button>
       </div>
-
-      {/* Mood Stats */}
-      <div className="bg-card p-6 rounded-xl shadow-md max-w-2xl mb-6">
-        <h2 className="text-2xl font-semibold mb-4">Mood Stats</h2>
-        <p>Total Entries: {entries.length}</p>
-        <p>Average Mood: {averageMood}/10</p>
-      </div>
-
-      {/* Recent Entries */}
-      <div className="bg-card p-6 rounded-xl shadow-md max-w-2xl">
-        <h2 className="text-2xl font-semibold mb-4">Recent Entries</h2>
-        {entries.length === 0 ? (
-          <p>No entries yet.</p>
-        ) : (
-          <ul className="space-y-3">
-            {entries.slice(-5).reverse().map((entry) => (
-              <li key={entry.id} className="p-4 bg-muted rounded-md">
-                <p>
-                  <strong>Mood:</strong> {entry.mood}/10
-                </p>
-                <p>
-                  <strong>Note:</strong> {entry.note || "-"}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {new Date(entry.createdAt).toLocaleDateString()}
-                </p>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-    </div>
+    </header>
   );
 }
