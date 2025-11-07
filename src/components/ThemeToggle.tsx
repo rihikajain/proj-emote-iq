@@ -1,13 +1,15 @@
 "use client";
 import { Moon, Sun } from "lucide-react";
-import { useTheme } from "@/hooks/useTheme";
+import useTheme from "@/hooks/useTheme";
+
 
 export default function ThemeToggle() {
-  const { theme, toggleTheme } = useTheme();
+ const { theme, toggle } = useTheme();
+
 
   return (
     <button
-      onClick={toggleTheme}
+      onClick={toggle}
       className="p-2 rounded-full bg-[var(--color-primary)] text-[var(--color-bg)] shadow-md hover:opacity-90 transition-all duration-300"
       aria-label="Toggle theme"
     >

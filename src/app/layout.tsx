@@ -4,6 +4,7 @@ import "./theme.css";
 import  Navbar  from "@/components/Navbar";
 import  AnimatedBackground  from "@/components/AnimatedBackground";
 import Providers from "./providers";
+
 export const metadata = {
   title: "EmoteIQ",
   description: "Know your mood, know yourself",
