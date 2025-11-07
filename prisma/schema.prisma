@@ -8,15 +8,15 @@ datasource db {
 }
 
 model User {
-  id          String       @id @default(cuid())
+  id          String      @id @default(cuid())
   name        String?
-  email       String?      @unique
+  email       String?     @unique
+  createdAt   DateTime    @default(now())
   password    String?
   image       String?
-  createdAt   DateTime     @default(now())
-  accounts    Account[]   
-  sessions    Session[]   
-  moodEntries MoodEntry[]  
+  accounts    Account[]
+  moodEntries MoodEntry[]
+  sessions    Session[]
 }
 
 model Account {
@@ -32,7 +32,6 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
-
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
@@ -43,22 +42,22 @@ model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
-
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model MoodEntry {
   id          String       @id @default(cuid())
-  user        User         @relation(fields: [userId], references: [id])
   userId      String
   mood        String
   note        String?
   createdAt   DateTime     @default(now())
+  moodScore   Int?
+  user        User         @relation(fields: [userId], references: [id])
   emotionTags EmotionTag[] @relation("MoodEntryEmotionTags")
 }
 
 model EmotionTag {
-  id         String       @id @default(cuid())
-  name       String       @unique
-  moods      MoodEntry[]  @relation("MoodEntryEmotionTags")
+  id    String      @id @default(cuid())
+  name  String      @unique
+  moods MoodEntry[] @relation("MoodEntryEmotionTags")
 }
