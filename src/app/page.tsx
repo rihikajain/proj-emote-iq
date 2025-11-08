@@ -11,7 +11,6 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col items-center justify-center text-center w-full min-h-screen bg-gradient-to-b from-background to-muted/30 text-foreground overflow-hidden">
-      {/* HERO SECTION */}
       <div className="min-h-screen min-w-screen">
         <motion.section
           initial={{ opacity: 0, y: 30 }}
@@ -71,7 +70,6 @@ export default function HomePage() {
         </motion.section>
       </div>
 
-      {/* ABOUT SECTION */}
       <section className="py-20 px-6 max-w-4xl">
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
@@ -140,7 +138,6 @@ export default function HomePage() {
         </motion.ul>
       </section>
 
-      {/* CONTACT SECTION */}
       <section className="py-16 px-6 w-full bg-muted/40 text-center">
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
@@ -166,7 +163,6 @@ export default function HomePage() {
         </Button>
       </section>
 
-      {/* FOOTER */}
       <footer className="py-8 text-center text-sm text-muted-foreground">
         <p>© {new Date().getFullYear()} EmoteIQ. All rights reserved.</p>
         <div className="flex justify-center gap-4 mt-2">

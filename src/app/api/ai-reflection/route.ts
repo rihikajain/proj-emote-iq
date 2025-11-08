@@ -1,17 +1,15 @@
-// /app/api/reflection/route.ts
+
 
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
-// ✅ Correct SDK import
+
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// ✅ Initialize client (requires GEMINI_API_KEY in .env)
 const ai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-const MODEL_NAME = "gemini-2.0-flash"; // or "gemini-1.5-flash"
-// ... keep all imports and initialization as in your older version
+const MODEL_NAME = "gemini-2.0-flash";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -66,16 +64,16 @@ export async function GET() {
 
     const rawText = result.response.text() || "No reflection could be generated.";
 
-    // --- Split into paragraphs ---
+
     const paragraphs = rawText
-      .split(/\n\s*\n/) // split on double line breaks
+      .split(/\n\s*\n/) 
       .map((p) => p.trim())
       .filter(Boolean);
 
     const summary = paragraphs[0] || "";
     const motivational = paragraphs[1] || "";
 
-    // Structured mood data
+
     const moodDataStructured = entries.map((e) => ({
       date: e.createdAt.toISOString().split("T")[0],
       mood: e.mood,

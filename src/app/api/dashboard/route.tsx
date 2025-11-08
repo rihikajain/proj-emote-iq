@@ -7,12 +7,10 @@ import { authOptions } from "@/lib/auth";
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
-
-    // ✅ Always check session
     if (!session?.user?.id) {
       return NextResponse.json(
         { averageMood: 0, trend: [], message: "Unauthorized" },
-        { status: 200 } // return 200 to avoid frontend JSON error
+        { status: 200 } 
       );
     }
 
@@ -37,7 +35,6 @@ export async function GET() {
     return NextResponse.json({ averageMood, trend });
   } catch (err) {
     console.error("Dashboard API Error:", err);
-    // Always return valid JSON
     return NextResponse.json({ averageMood: 0, trend: [], message: "Server Error" });
   }
 }

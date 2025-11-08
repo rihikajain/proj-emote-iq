@@ -1,6 +1,6 @@
 "use client";
 
-import "./AnimatedBackground.css"; // we'll define keyframes here
+import "./AnimatedBackground.css";
 
 export default function AnimatedBackground() {
   const blobs = [

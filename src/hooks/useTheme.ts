@@ -13,7 +13,6 @@ export default function useTheme() {
   });
 
   useEffect(() => {
-    // apply attribute to <html>
     document.documentElement.setAttribute("data-theme", theme === "dark" ? "dark" : "light");
     localStorage.setItem("emote-theme", theme);
   }, [theme]);

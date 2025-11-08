@@ -1,15 +1,14 @@
 :root{
-  /* Primary palette (single source of truth) */
+/* light */
   --color-primary: #A1D6CB;
-  --color-bg: #EAF6F3; /* lighter background of primary */
+  --color-bg: #EAF6F3;
   --color-text: #1A1A1A;
   --color-secondary-1: #A19AD3;
   --color-secondary-2: #FFF574;
   --color-secondary-3: #FF8383;
  --color-secondary-4: #99D864;
- 
-  /* derived tokens */
-  --bg-rgb: 234,246,243; /* rgb of --color-bg for rgba usage */
+
+  --bg-rgb: 234,246,243; 
   --text-rgb: 26,26,26;
   --card-bg: rgba(255,255,255,0.7);
   --glass: rgba(255,255,255,0.6);
@@ -17,7 +16,7 @@
   --shadow: 0 10px 30px rgba(0,0,0,0.08);
 }
 
-/* Dark theme override — toggled by data-theme="dark" on <html> */
+/* dark */
 [data-theme="dark"] {
   --color-primary: #89C1B3;
   --color-bg: #121212;
@@ -27,8 +26,6 @@
   --color-secondary-3: #E57373;
   --color-secondary-4: #99D864;
 
-
-
   --bg-rgb: 18,18,18;
   --text-rgb: 234,234,234;
   --card-bg: rgba(17,17,17,0.7);
@@ -37,13 +34,10 @@
   --shadow: 0 12px 36px rgba(0,0,0,0.6);
 }
 
-/* small utilities used by components */
 body {
   background-color: rgb(var(--bg-rgb));
   color: rgb(var(--text-rgb));
 }
-
-/* animated blobs for the background */
 .bg-blob {
   position: absolute;
   border-radius: 9999px;
@@ -60,7 +54,6 @@ body {
   100% { transform: translateY(0) scale(1); }
 }
 
-/* reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
   .bg-blob { animation: none; }
 }

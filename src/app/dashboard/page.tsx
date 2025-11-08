@@ -44,12 +44,10 @@ const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
 
-  // Redirect if unauthenticated
   useEffect(() => {
     if (status === "unauthenticated") router.push("/login");
   }, [status, router]);
 
-  // Fetch AI reflection
   async function fetchReflection() {
     try {
       const res = await fetch("/api/ai-reflection");
@@ -60,8 +58,6 @@ const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
       if (lastMood >= 4) {
         setShowConfetti(true);
-
-        // Hide confetti after 2 seconds
         setTimeout(() => setShowConfetti(false), 5000);
       }
     } catch {
@@ -117,8 +113,6 @@ const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   return (
     <div className="min-h-screen min-w-screen p-8 max-w-7xl mx-auto space-y-8">
-      {/* Confetti */}
-      {/* Confetti */}
       <AnimatePresence>
         {showConfetti && (
           <Confetti
@@ -128,8 +122,6 @@ const [activeIndex, setActiveIndex] = useState<number | null>(null);
           />
         )}
       </AnimatePresence>
-
-      {/* Top Greeting + Today Mood */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -160,8 +152,6 @@ const [activeIndex, setActiveIndex] = useState<number | null>(null);
           </Button>
         </div>
       </motion.div>
-
-      {/* Motivational Quote Full Width */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -169,10 +159,7 @@ const [activeIndex, setActiveIndex] = useState<number | null>(null);
       >
         {reflection.motivational}
       </motion.div>
-
-      {/* Two-column Grid for Summary & Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Left Column: Summary + Activities */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -189,9 +176,6 @@ const [activeIndex, setActiveIndex] = useState<number | null>(null);
             </h2>
             <p>{reflection.summary}</p>
           </motion.div>
-
-          {/* Mood Distribution Pie Chart */}
-          {/* Mood Distribution Pie Chart */}
 <motion.div
   initial={{ scale: 0.95, opacity: 0 }}
   animate={{ scale: 1, opacity: 1 }}
@@ -203,12 +187,10 @@ const [activeIndex, setActiveIndex] = useState<number | null>(null);
   }}
   className="p-6 rounded-2xl shadow-md bg-[var(--card-bg)] hover:scale-105 transition-transform"
 >
-  {/* Heading */}
+
   <h2 className="text-xl font-semibold mb-4 text-[var(--color-primary)] text-center">
     Mood Distribution
   </h2>
-
-  {/* Counts */}
   <div className="flex justify-around mb-4 text-center">
     <div>
       <p className="font-bold text-lg text-[#FF8383]">{counts.low}</p>
@@ -223,8 +205,6 @@ const [activeIndex, setActiveIndex] = useState<number | null>(null);
       <p className="text-sm">Good</p>
     </div>
   </div>
-
-  {/* Pie Chart */}
   <ResponsiveContainer width="100%" height={280}> {/* increased height */}
     <PieChart>
       <Pie
@@ -246,14 +226,12 @@ const [activeIndex, setActiveIndex] = useState<number | null>(null);
 </motion.div>
 
         </motion.div>
-
-        {/* Right Column: Charts */}
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           className="space-y-6"
         >
-          {/* Mood Trend Line Chart */}
+ 
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -306,8 +284,6 @@ const [activeIndex, setActiveIndex] = useState<number | null>(null);
               ))}
             </ul>
           </motion.div>
-
-          {/* Mood Streak */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -318,14 +294,14 @@ const [activeIndex, setActiveIndex] = useState<number | null>(null);
               <motion.div
                 key={i}
                 initial={{ scale: 0 }}
-                animate={{ scale: 1.5 }} // bigger size
+                animate={{ scale: 1.5 }} 
                 transition={{
                   delay: i * 0.15,
                   type: "spring",
                   stiffness: 500,
                   damping: 20,
                 }}
-                whileHover={{ scale: 1.8 }} // playful hover
+                whileHover={{ scale: 1.8 }}
                 className="w-14 h-14 flex items-center justify-center rounded-full bg-[var(--color-secondary-1)] text-3xl cursor-pointer shadow-lg"
               >
                 {moodEmoji(e.moodScore)}
@@ -335,7 +311,6 @@ const [activeIndex, setActiveIndex] = useState<number | null>(null);
         </motion.div>
       </div>
 
-      {/* Add Mood Dialog */}
       <AddEntryDialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}

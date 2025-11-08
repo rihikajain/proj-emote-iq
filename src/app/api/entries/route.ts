@@ -1,4 +1,4 @@
-// /app/api/entries/route.ts
+
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
@@ -36,7 +36,6 @@ const moodCategories = [
   },
 ];
 
-// 🔹 GET all user entries
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
@@ -59,7 +58,6 @@ export async function GET() {
   }
 }
 
-// 🔹 POST new mood entry
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id)
@@ -74,7 +72,7 @@ export async function POST(req: Request) {
       for (const c of moodCategories) {
         if (c.keywords.some((kw) => lower.includes(kw))) return c.score;
       }
-      return 3; // default neutral
+      return 3;
     }
 
     const derivedScore =

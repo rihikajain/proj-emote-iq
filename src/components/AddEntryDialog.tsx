@@ -89,7 +89,7 @@ export default function AddEntryDialog({
         </DialogHeader>
 
         <div className="space-y-4">
-          {/* Mood Emoji Picker */}
+         
           <div>
             <p className="font-semibold mb-2">How are you feeling today?</p>
             <div className="flex justify-between items-center">

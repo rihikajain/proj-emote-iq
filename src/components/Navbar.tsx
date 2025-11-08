@@ -1,4 +1,4 @@
-// src/components/Navbar.tsx
+
 "use client";
 
 import Link from "next/link";
@@ -11,7 +11,7 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const { theme, toggle } = useTheme();
-  // close dropdown on outside click
+
   useEffect(() => {
     function onDoc(e: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(e.target as Node))
@@ -31,7 +31,6 @@ export default function Navbar() {
           backdropFilter: "blur(6px)",
         }}
       >
-        {/* left: brand */}
         <div className="flex items-center justify-between  w-full ">
           <div className="flex items-center gap-6">
             <Link href="/" className="flex items-center gap-3">
@@ -60,12 +59,10 @@ export default function Navbar() {
             </Link>
           </div>
 
-          {/* right: conditional nav */}
           <div className="flex items-center  gap-4 ">
-            {/* show links only when authenticated */}
             {status === "authenticated" && (
               <>
-              <Link
+                <Link
                   href="/"
                   className="text-sm hover:underline font-semibold"
                 >
@@ -86,19 +83,14 @@ export default function Navbar() {
               </>
             )}
 
-            {/* if loading, show nothing extra */}
             {status === "loading" && (
               <div className="w-6 h-6 rounded-full bg-gray-200 animate-pulse" />
             )}
 
-            {/* if unauthenticated, only show brand (we already have left) and optionally login link */}
             {status !== "authenticated" && (
-              <div className="ml-2" aria-hidden>
-                {/* intentionally empty to keep layout minimal for unauthenticated users */}
-              </div>
+              <div className="ml-2" aria-hidden></div>
             )}
 
-            {/* when authenticated show username and dropdown */}
             {status === "authenticated" && session?.user && (
               <div className="relative" ref={menuRef}>
                 <button
@@ -149,8 +141,6 @@ export default function Navbar() {
             )}
           </div>
         </div>
-
-        {/* toggle button/ */}
 
         <button
           suppressHydrationWarning

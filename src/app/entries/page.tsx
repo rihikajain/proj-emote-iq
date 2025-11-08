@@ -14,15 +14,13 @@ const toProperCase = (str: string) =>
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
 
-// Get start of week (Sunday) for a given date
 const getStartOfWeek = (date: Date) => {
   const d = new Date(date);
-  const day = d.getDay(); // 0 = Sunday
+  const day = d.getDay(); 
   d.setDate(d.getDate() - day);
   return new Date(d.getFullYear(), d.getMonth(), d.getDate());
 };
 
-// Format a date as "Sun 3 Nov"
 const formatDayLabel = (date: Date) =>
   date.toLocaleDateString("en-US", {
     weekday: "short",
@@ -70,7 +68,6 @@ export default function EntriesClient() {
       ? toProperCase(session.user.name)
       : "User";
 
-  // Group entries by week start date, then by day
   const weeklyEntries: Record<string, Record<string, any[]>> = {};
   entries.forEach((entry) => {
     const dateObj = new Date(entry.createdAt);
@@ -103,15 +100,12 @@ export default function EntriesClient() {
           </Button>
         </motion.div>
       </div>
-
-      {/* Add Entry Dialog */}
       <AddEntryDialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
         onAdded={fetchEntries}
       />
 
-      {/* Weekly Entries */}
       {entries.length === 0 ? (
         <p className="text-center text-[var(--muted)] mt-20 text-lg">
           No entries yet!
