@@ -30,7 +30,7 @@ It helps you record your daily emotions, visualize patterns, and receive persona
 - **Framework:** [Next.js 14](https://nextjs.org/)
 - **Language:** TypeScript
 - **Database:** PostgreSQL (via Prisma ORM)
-- **Authentication:** NextAuth.js (Google OAuth)
+- **Authentication:** NextAuth.js ,Prisma Adapter
 - **AI Integration:** Google Gemini API
 - **Styling:** Tailwind CSS + ShadCN UI
 - **Animations:** Framer Motion
@@ -43,7 +43,7 @@ It helps you record your daily emotions, visualize patterns, and receive persona
 ✅ AI-powered weekly reflections  
 ✅ Secure Google Authentication  
 ✅ Mood tracking and journaling  
-✅ Data visualization and analytics (coming soon)  
+✅ Data visualization and analytics
 ✅ Beautiful, theme-based UI  
 
 ---
@@ -113,20 +113,30 @@ src/
  │   ├─ api/
  │   │   └─ ai-reflection/
  │   │       └─ route.ts
+ │   │   └─ auth/
+ │   │       └─ [...nextauth]
+ │   │       └─ signup/
+ │   │       └─ dashboard/
+ │   │       └─ entries/
+ │   │       └─ quote/
  │   ├─ dashboard/
- │   ├─ auth/
+ │   ├─ entries/
+ │   ├─ login/
+ │   ├─ signup/
+ │   ├─ providers.tsx
  │   ├─ page.tsx
+ │   ├─ globals.css
+ │   ├─ theme.css
  │   └─ layout.tsx
  ├─ components/
- │   ├─ AddEntryDialog.tsx
- │   ├─ ui/
- │   └─ charts/
  ├─ lib/
  │   ├─ auth.ts
  │   ├─ prisma.ts
  │   └─ utils.ts
- └─ styles/
-     └─ globals.css
+ ├─ hooks/
+ ├─ types/
+
+
 ```
 
 ### 📊 Database Schema (Simplified)
