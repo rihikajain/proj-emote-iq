@@ -1,15 +1,14 @@
-
-
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
-
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const ai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 const MODEL_NAME = "gemini-2.0-flash";
+// const MODEL_NAME = "gemini-1.5-flash";
+// const MODEL_NAME = "gemini-pro";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -40,7 +39,9 @@ export async function GET() {
   const moodData = entries
     .map(
       (e) =>
-        `${e.createdAt.toDateString()}: score ${e.moodScore} (${e.mood}) note: ${e.note}`
+        `${e.createdAt.toDateString()}: score ${e.moodScore} (${
+          e.mood
+        }) note: ${e.note}`
     )
     .join("\n");
 
@@ -48,31 +49,63 @@ export async function GET() {
     "You are a friendly emotional wellness assistant. Provide a reflection of the user's emotional trend over the last 7 days. Format your response in exactly and strictly in two paragraphs: first paragraph should be a concise summary, second paragraph should be a motivational quote or message based on the reflection.";
 
   const userPrompt = `Here are my recent mood entries:\n${moodData}`;
+  function generateFallbackReflection(entries: any[]) {
+    const avg =
+      entries.reduce((sum, e) => sum + (e.moodScore ?? 0), 0) / entries.length;
+
+    if (avg <= 3) {
+      return {
+        summary:
+          "Your recent mood entries suggest a challenging emotional week. There are signs of fatigue or stress, but the consistency in tracking shows strength.",
+        motivational:
+          "Be gentle with yourself. Healing and progress are not linear.",
+      };
+    }
+
+    if (avg <= 6) {
+      return {
+        summary:
+          "Your mood over the past week appears mixed, with both steady and difficult moments. This reflects resilience amid everyday challenges.",
+        motivational:
+          "Progress doesn’t require perfection — consistency matters more.",
+      };
+    }
+
+    return {
+      summary:
+        "Your recent mood entries show a generally positive and balanced emotional state. You seem to be managing your wellbeing well.",
+      motivational:
+        "Celebrate this momentum and continue nurturing habits that support you.",
+    };
+  }
 
   try {
-    const model = ai.getGenerativeModel({ model: MODEL_NAME });
-
-    const result = await model.generateContent({
-      contents: [
-        {
-          role: "user",
-          parts: [{ text: `${systemInstruction}\n\n${userPrompt}` }],
-        },
-      ],
-      generationConfig: { temperature: 0.5, maxOutputTokens: 500 },
+    const model = ai.getGenerativeModel({
+      model: MODEL_NAME,
+      systemInstruction,
     });
 
-    const rawText = result.response.text() || "No reflection could be generated.";
+   const result = await model.generateContent({
+  contents: [
+    {
+      role: "user",
+      parts: [{ text: userPrompt }],
+    },
+  ],
+  generationConfig: { temperature: 0.5, maxOutputTokens: 300 },
+});
 
+
+    const rawText =
+      result.response.text() || "No reflection could be generated.";
 
     const paragraphs = rawText
-      .split(/\n\s*\n/) 
+      .split(/\n\s*\n/)
       .map((p) => p.trim())
       .filter(Boolean);
 
     const summary = paragraphs[0] || "";
     const motivational = paragraphs[1] || "";
-
 
     const moodDataStructured = entries.map((e) => ({
       date: e.createdAt.toISOString().split("T")[0],
@@ -102,10 +135,22 @@ export async function GET() {
     });
   } catch (error) {
     console.error("Gemini API Error:", error);
-    return NextResponse.json(
-      { error: "Failed to generate AI reflection. Check API key and quota." },
-      { status: 500 }
-    );
+
+    const fallback = generateFallbackReflection(entries);
+
+    const moodDataStructured = entries.map((e) => ({
+      date: e.createdAt.toISOString().split("T")[0],
+      mood: e.mood,
+      moodScore: e.moodScore,
+      note: e.note,
+    }));
+
+    return NextResponse.json({
+      summary: fallback.summary,
+      motivational: fallback.motivational,
+      moodData: moodDataStructured,
+      activitySuggestions: ["Take a short walk", "Write one positive thought"],
+      aiUsed: false,
+    });
   }
 }
-

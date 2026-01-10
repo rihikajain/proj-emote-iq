@@ -37,32 +37,64 @@ type WeeklyReflection = {
 export default function DashboardPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   const [reflection, setReflection] = useState<WeeklyReflection | null>(null);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [aiLoading, setAiLoading] = useState(true);
 
   useEffect(() => {
     if (status === "unauthenticated") router.push("/login");
   }, [status, router]);
 
   async function fetchReflection() {
+    setLoading(true);
+    setAiLoading(true);
+
     try {
       const res = await fetch("/api/ai-reflection");
-      const data = await res.json();
-      setReflection(data);
 
-      const lastMood = data.moodData[data.moodData.length - 1]?.moodScore || 0;
+      const data = await res.json();
+
+      // Always enforce a safe shape (AI-independent)
+      const safeReflection = {
+        summary:
+          data.summary ||
+          "Your mood data is being tracked consistently this week.",
+        motivational:
+          data.motivational ||
+          "Keep showing up for yourself — even small steps matter.",
+        moodData: data.moodData || [],
+        activitySuggestions: data.activitySuggestions || [],
+      };
+
+      setReflection(safeReflection);
+
+      const lastMood =
+        safeReflection.moodData[safeReflection.moodData.length - 1]
+          ?.moodScore || 0;
 
       if (lastMood >= 4) {
         setShowConfetti(true);
         setTimeout(() => setShowConfetti(false), 5000);
       }
-    } catch {
-      setReflection(null);
+    } catch (err) {
+      console.error("Failed to fetch reflection:", err);
+
+      // NEVER break dashboard
+      setReflection(
+        (prev) =>
+          prev || {
+            summary: "Your mood data is available.",
+            motivational: "You’re doing your best — keep going.",
+            moodData: [],
+            activitySuggestions: [],
+          }
+      );
     } finally {
+      setAiLoading(false);
       setLoading(false);
     }
   }
@@ -74,7 +106,7 @@ const [activeIndex, setActiveIndex] = useState<number | null>(null);
   if (loading)
     return <div className="p-8 text-center">Loading your dashboard...</div>;
   if (!reflection)
-    return <div className="p-8 text-center">No reflection available</div>;
+    return <div className="p-8 text-center">Loading your insights...</div>;
 
   const moodData = reflection.moodData || [];
   const trendData = moodData.map((e) => ({
@@ -152,13 +184,18 @@ const [activeIndex, setActiveIndex] = useState<number | null>(null);
           </Button>
         </div>
       </motion.div>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-[var(--color-secondary-1)]  text-white p-6 rounded-2xl shadow-md text-center text-lg italic"
-      >
-        {reflection.motivational}
-      </motion.div>
+      {aiLoading ? (
+        <p className="italic text-gray-400">Generating reflection…</p>
+      ) : (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-[var(--color-secondary-1)]  text-white p-6 rounded-2xl shadow-md text-center text-lg italic"
+        >
+          {reflection.motivational}
+        </motion.div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <motion.div
           initial={{ opacity: 0, x: -20 }}
@@ -176,62 +213,67 @@ const [activeIndex, setActiveIndex] = useState<number | null>(null);
             </h2>
             <p>{reflection.summary}</p>
           </motion.div>
-<motion.div
-  initial={{ scale: 0.95, opacity: 0 }}
-  animate={{ scale: 1, opacity: 1 }}
-  transition={{
-    type: "spring",
-    stiffness: 200,
-    damping: 15,
-    delay: 0.1,
-  }}
-  className="p-6 rounded-2xl shadow-md bg-[var(--card-bg)] hover:scale-105 transition-transform"
->
-
-  <h2 className="text-xl font-semibold mb-4 text-[var(--color-primary)] text-center">
-    Mood Distribution
-  </h2>
-  <div className="flex justify-around mb-4 text-center">
-    <div>
-      <p className="font-bold text-lg text-[#FF8383]">{counts.low}</p>
-      <p className="text-sm">Low</p>
-    </div>
-    <div>
-      <p className="font-bold text-lg text-[#FFF574]">{counts.neutral}</p>
-      <p className="text-sm">Neutral</p>
-    </div>
-    <div>
-      <p className="font-bold text-lg text-[#99D864]">{counts.good}</p>
-      <p className="text-sm">Good</p>
-    </div>
-  </div>
-  <ResponsiveContainer width="100%" height={280}> {/* increased height */}
-    <PieChart>
-      <Pie
-        data={pieData}
-        dataKey="value"
-        nameKey="name"
-        innerRadius={60}
-        outerRadius={120} // bigger outer radius
-        onMouseEnter={(_, index) => setActiveIndex(index)}
-        onMouseLeave={() => setActiveIndex(null)}
-      >
-        {pieData.map((entry, index) => (
-          <Cell key={index} fill={entry.color} cursor="pointer" />
-        ))}
-      </Pie>
-      <Tooltip formatter={(value: any, name: any) => `${name}: ${value}`} />
-    </PieChart>
-  </ResponsiveContainer>
-</motion.div>
-
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{
+              type: "spring",
+              stiffness: 200,
+              damping: 15,
+              delay: 0.1,
+            }}
+            className="p-6 rounded-2xl shadow-md bg-[var(--card-bg)] hover:scale-105 transition-transform"
+          >
+            <h2 className="text-xl font-semibold mb-4 text-[var(--color-primary)] text-center">
+              Mood Distribution
+            </h2>
+            <div className="flex justify-around mb-4 text-center">
+              <div>
+                <p className="font-bold text-lg text-[#FF8383]">{counts.low}</p>
+                <p className="text-sm">Low</p>
+              </div>
+              <div>
+                <p className="font-bold text-lg text-[#FFF574]">
+                  {counts.neutral}
+                </p>
+                <p className="text-sm">Neutral</p>
+              </div>
+              <div>
+                <p className="font-bold text-lg text-[#99D864]">
+                  {counts.good}
+                </p>
+                <p className="text-sm">Good</p>
+              </div>
+            </div>
+            <ResponsiveContainer width="100%" height={280}>
+              {" "}
+              {/* increased height */}
+              <PieChart>
+                <Pie
+                  data={pieData}
+                  dataKey="value"
+                  nameKey="name"
+                  innerRadius={60}
+                  outerRadius={120} // bigger outer radius
+                  onMouseEnter={(_, index) => setActiveIndex(index)}
+                  onMouseLeave={() => setActiveIndex(null)}
+                >
+                  {pieData.map((entry, index) => (
+                    <Cell key={index} fill={entry.color} cursor="pointer" />
+                  ))}
+                </Pie>
+                <Tooltip
+                  formatter={(value: any, name: any) => `${name}: ${value}`}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </motion.div>
         </motion.div>
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           className="space-y-6"
         >
- 
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -294,7 +336,7 @@ const [activeIndex, setActiveIndex] = useState<number | null>(null);
               <motion.div
                 key={i}
                 initial={{ scale: 0 }}
-                animate={{ scale: 1.5 }} 
+                animate={{ scale: 1.5 }}
                 transition={{
                   delay: i * 0.15,
                   type: "spring",
